@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;ServiceExchange&apos; to &apos;ServiceMarketplace&apos;" description="Rename resource &apos;ServiceExchange&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/ServiceExchange" name="ServiceMarketplace" stamp="1520359238505" updateReferences="true"/>
+</session>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move &apos;ethers-v2.min.js&apos; to &apos;js&apos;" description="Move &apos;ethers-v2.min.js&apos; to &apos;js&apos;" destination="WebContent/js" element1="WebContent/ethers-v2.min.js" flags="7" id="org.eclipse.ltk.core.refactoring.move.resources" resources="1" stamp="1520359365887" updateReferences="true"/>
+</session>
