@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+	<form id="theForm" action="ipfs" method="post" enctype="multipart/form-data">
+	    <input type="text" name="description" />
+	    <input type="file" name="file" />
+	    <input type="submit" />
+	</form>
+	
+	<script>
+	$("#theForm").submit(function(e) {
+
+	    var url = "ipfs"; // the script where you handle the form input.
+
+	    $.ajax({
+	           type: "POST",
+	           url: url,
+	           data: new FormData( this ),
+	           processData: false,
+	           contentType: false, // serializes the form's elements.
+	           success: function(data)
+	           {
+	               alert(data); // show response from the php script.
+	           }
+	         });
+
+	    e.preventDefault(); // avoid to execute the actual submit of the form.
+	});
+	</script>
+	
+</body>
+</html>

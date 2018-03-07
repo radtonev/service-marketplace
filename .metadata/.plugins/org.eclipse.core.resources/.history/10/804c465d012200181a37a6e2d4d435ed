@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body>
+	<form id="theForm" action="ipfs" method="post" enctype="multipart/form-data">
+	    <input type="text" name="description" />
+	    <input type="file" name="file" />
+	    <input type="submit" />
+	</form>
+	
+	<script>
+		$("#theForm").ajaxForm({url: 'ipfs', type: 'post'})
+	</script>
+	
+</body>
+</html>
