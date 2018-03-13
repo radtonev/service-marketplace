@@ -1,0 +1,282 @@
+var Controller = (function () {
+	
+	function getTemplate(templateName, callback){
+		$.ajax({
+		 	 url: 'templates/'+templateName + ".handlebars",
+		 	 method: "GET",
+		 	 contentType: "text/plain",
+		 	 dataType: "text",
+		 	 success: function(templateHtml){
+					callback(templateHtml);		 	 
+		 	 }		
+		});	
+	}
+	
+	function init(){
+		
+		
+		
+		$("#test-btn").on("click",function(){
+			Marketplace.getAllApprovedServices(function(result){
+				
+				console.log(result);
+			});
+		});
+		
+		
+		$('#login-modal-btn').on('click',function(e){
+			getTemplate("load-wallet",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal());
+				$("#loadWallet").modal();
+				$('#access-acc-btn').on('click',function(){
+	  				var pass = $('#load-wallet-pass').val();
+	  				Marketplace.recoverWalletFromLocalStorage(pass,function(wallet){
+	  					$("#loadWallet").modal('toggle');
+	  					showSuccessModal("Hello, " + wallet.address);		
+	  				});
+	  			});
+			});
+			e.preventDefault();
+		});
+
+		$('#signup-modal-btn').on('click',function(e){
+			getTemplate("new-wallet",function(html){
+				getTemplate('recover-wallet',function(html2){
+					var bothModals = Handlebars.compile(html + html2);
+					$("#modal-container").html(bothModals());
+					$("#newWallet").modal();
+					$('#create-acc-btn').on('click',function(){
+	  					var pass = $('#new-wallet-pass').val();
+	  					Marketplace.createNewWallet(pass,function(wallet){
+	  						$("#newWallet").modal('toggle');
+	  						showSuccessModal("Keep your seed safe: <strong>" + wallet.mnemonic + "</strong>");		
+	  					});
+	  				});
+	  				$('#recover-acc-btn').on('click',function(){
+	  					var seed = $('#recover-wallet-seed').val();
+	  					var pass = $('#recover-wallet-pass').val();
+	  					Marketplace.recoverWalletFromSeedAndEncrypt(seed, pass,function(wallet){
+	  						$("#recoverWallet").modal('toggle');
+	  						showSuccessModal("Hello, " + wallet.address);		
+	  					});
+	  				});
+				});
+			});
+			e.preventDefault();
+		});
+	
+		$('#deposit-modal-btn').on('click',function(e){
+			getTemplate("deposit",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal({address: Marketplace.getWalletAddress()}));
+				$("#depositModal").modal();
+			});
+			e.preventDefault();
+		});
+	
+		$('#withdraw-modal-btn').on('click',function(e){
+			getTemplate("withdraw",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				
+				Marketplace.getWalletBalance().then(function(balance){				
+				$("#modal-container").html(loadWalletModal({balance: balance/1000000000000000000}));
+				$("#withdrawModal").modal();
+				$('#withdraw-btn').on('click',function(){
+					var address = $('#withdraw-address').val();
+					Marketplace.withdrawFromWallet(address,function(transaction){
+						$("#withdrawModal").modal('toggle');						
+
+						showSuccessModal("Transaction hash: " + transaction.hash);
+			
+					});
+				});
+				});
+			});
+			e.preventDefault();
+		});	
+		
+		
+		$("#submitService").submit(function(e) {
+	    		var url = "ipfs"; // the script where you handle the form input.
+
+	    		$.ajax({
+	           type: "POST",
+	           url: url,
+	           data: new FormData(this),
+	           processData: false,
+	           contentType: false, 
+	           success: function(data)
+	           {
+	        	   data = JSON.parse(data);
+	        	   var title = $("#title").val();
+	        	   var company = $('#company').val();
+	        	   var compensation = $('#compensation').val();
+	        	   var image = data.image;
+	               var description = data.description;
+
+	               Marketplace.submitService(title,image,company,description,compensation,function(resp){
+	            	   showSuccessModal("Transaction hash: " + resp.hash);
+	               }); 
+	           }
+	        });
+
+	         e.preventDefault(); // avoid to execute the actual submit of the form.
+	   });		
+
+		$("#submitApplication").submit(function (e) {
+			console.log("submit");
+			var url = "ipfs"; // the script where you handle the form input.
+
+			$.ajax({
+	       type: "POST",
+	       url: url,
+	       data: new FormData(this),
+	       processData: false,
+	       contentType: false, 
+	       success: function(data)
+	       {
+	    	   data = JSON.parse(data);
+	    	   var serviceId = $("#application-service-id").val();
+        	   var name = $("#name").val();
+        	   var contact = $('#email').val();
+        	   var cv = data.cv
+        	   console.log(serviceId);
+        	   console.log(name);
+        	   console.log(contact);
+        	   console.log(cv);
+               Marketplace.submitApplication(name,contact,cv,serviceId,function(resp){
+            	   $("#applicationModal").modal("toggle");
+            	   showSuccessModal("Transaction hash: " + resp.hash);
+               }); 
+	       }
+			});
+
+			e.preventDefault(); // avoid to execute the actual submit of the form.
+		});
+
+		
+		if(!contract){
+			showErrorModal("Please log in before you proceed!")
+		}
+		
+
+	}
+
+	function showSuccessModal(message){
+			getTemplate("success",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#successModal").modal();
+			});
+	}	
+	
+	function showErrorModal(message){
+			getTemplate("error",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#errorModal").modal();
+			});
+	}		
+	
+	function showOffers(){
+		$('#products').html('<section id="products"><div class="container"><h1 class="title">Available Offers</h1><hr class="divider" style="width:50%;"><p class="text-center">We have chosen for you:</p><div class="row products-row" id="prod" style="margin-top:40px;"></div></div></section>');
+			getTemplate("grid-item",function(html){
+				var gridItemTemplate = Handlebars.compile(html);
+				Marketplace.getAllApprovedServices(function(offers){
+					for(var i = 0;i<offers.length;i++){
+						var item = gridItemTemplate(offers[i]);
+						$('#products').find('.products-row').append(item);
+					}
+				});
+
+			});
+	}
+	
+	function openApplicationModal(id){
+		$("#application-service-id").val(id);
+		$("#applicationModal").modal();
+
+	}
+	
+
+	
+	function showAccount(){
+		var userDataJson = {};
+		$.ajax({
+			url: 'admin',
+			method: 'GET',
+			contentType: "text/plain",
+			success: function(adminAddress){
+				userDataJson.isAdmin = false;
+				if(Marketplace.getWalletAddress() == adminAddress){
+					userDataJson.isAdmin = true;
+				}
+				getTemplate("user-data",function(html){
+					
+				
+					//Get user data from smart contract
+					Marketplace.getMyServicesAsEmployer(function(services){
+				
+						userDataJson.services = services;
+						
+						Marketplace.getMyApplicationsAsEmployer(function(applications){
+						
+							for(var i = 0;i<services.length;i++){
+								if(!userDataJson.services[i].applications){
+									userDataJson.services[i].applications = [];
+								}
+								for(var j = 0;j<applications.length;j++){
+									if(applications[i].serviceId == userDataJson.services[i].serviceId){
+										userDataJson.services[i].applications.push(applications[i]);
+									}
+								}
+							}
+							
+							Marketplace.getMyApplicationsAsEmployee(function(myapps){
+							
+								userDataJson.myApplications = myapps;
+								//console.log(userDataJson);
+								if(userDataJson.isAdmin == true){
+									//Get all pending services
+									
+									Marketplace.getAllPendingServices(function(pendingServices){
+										userDataJson.pendingServices = pendingServices;
+									//	console.log(pendingServices);
+										var userDataTemplate = Handlebars.compile(html);
+										$('#products').html(userDataTemplate(userDataJson));
+									});
+								}
+							});
+						
+						});
+						
+						
+					});
+					
+					
+				});
+			}
+		});
+		
+		
+	}
+	
+	function approveServiceSubmission(id){
+		Marketplace.approveServiceSubmission(id,function(result){
+			showSuccessModal(result.hash);
+		});
+		
+	}
+	
+	return {
+		init: init,
+		showSuccessModal: showSuccessModal,
+		showErrorModal: showErrorModal,
+		openApplicationModal: openApplicationModal,
+		showAccount: showAccount,
+		showOffers: showOffers,
+		approveServiceSubmission: approveServiceSubmission
+	}
+	
+})();

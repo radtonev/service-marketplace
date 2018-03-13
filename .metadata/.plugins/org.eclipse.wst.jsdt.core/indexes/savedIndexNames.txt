@@ -2,8 +2,6 @@ INDEX VERSION 1.3+/home/radostin-t/eclipse/ServiceExchange/.metadata/.plugins/or
 2239946830.index
 13724296.index
 4175315817.index
-13724296.index
-2432484021.index
 1284881474.index
 3719151756.index
 2174026323.index

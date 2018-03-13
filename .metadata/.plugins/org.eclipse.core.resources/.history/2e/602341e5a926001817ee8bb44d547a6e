@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/animate.css">
+        <link rel="stylesheet" href="css/responsive.css">
+        <script src="js/vendor/jquery-1.10.2.min.js"></script>
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/main.js"></script>
+
+        <script src="js/wow.min.js"></script>
+        
+        <script>
+         new WOW(
+            ).init();
+        </script>
+		   <script src="js/vendor/ethers/ethers.js" type="text/javascript"></script>
+
+		  
+		  <script src="js/vendor/handlebars-v4.0.11.js" type="text/javascript"></script>
+		  <script src="js/controllers/marketplace.js" type="text/javascript"></script>
+  			<script src="js/controllers/controller.js"></script>
+    </head>
+    <body>
+
+
+    <header>
+        <div class="container">
+            <div class="row"  >
+                <div class="col-md-3 col-xs-6 col-sm-3">
+                    <a href="#" class="logo">
+                        <img src="images/logo.png" alt="">
+                    </a>
+                </div>
+                <div class="col-md-6 col-xs-6 col-sm-6">
+                    <div class="menu">
+                        <nav class="navbar navbar-default" role="navigation">
+                            <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header">
+                                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                    <ul class="nav navbar-nav">
+                                        <li><a href="#home" onclick="Controller.showOffers();"">Home</a></li>
+                                        <li><a href="#products">Find Job</a></li>
+                                        <li><a href="#contact">Post Job</a></li>
+                                        <li><a href="#products" onclick="Controller.showAccount();">Account</a></li>
+                                    </ul>
+                                  
+                                </div><!-- /.navbar-collapse -->
+                            </div><!-- /.container-fluid -->
+                        </nav>
+                    </div>
+                </div>
+                <div class="col-md-3 col-xs-12 col-sm-3">
+                    <ul class="social-info">
+                        <li><a id="login-modal-btn" href="#">Login</a></li>
+                        <li><a id="signup-modal-btn" href="#">Signup</a></li>
+                        <li><a id="deposit-modal-btn" href="#">Deposit</a></li>
+                        <li><a id="withdraw-modal-btn" href="#">Withdraw</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <section id="home">
+        <div class="container">
+				 <div class="row" style="margin-top: 80px">
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="block">
+                                        <img class="app-img img-responsive" src="images/slider/1.png" alt="">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-md-offset-1 col-sm-6">
+                                    <div class="block">
+                                        <h1>
+                                            Need a Service?<br> You've come to the right place!
+                                        </h1>
+                                        <p>
+														  Welcome to the first decentralized service marketplace. Start by creating a wallet and browsing our available services or posting your own.
+                                        </p>
+
+                                        <ul class="download-btn">
+                                            <li>
+                                                <a href="#contact" class="btn btn-default btn-grey"> <i class="fa fa-list"></i>Publish Service</a>
+                                            </li>
+                                            <li>
+                                                <a href="#products" class="btn btn-default btn-red"><i class="fa fa-shopping-cart"></i>Find Service</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                </div>
+        </div>
+    </section>
+
+
+
+
+    <section id="products">
+        <div class="container">
+            <h1 class="title">Available Offers</h1>
+            <hr class="divider" style="width:50%;">
+            <p class="text-center">We have chosen for you:</p>
+            <div class="row products-row" id="prod" style="margin-top:40px;">
+    				<!--
+                <div class="col-sm-3 wow fadeInUp product" data-wow-delay=".8s">
+                    <img src="images/products/7.jpg" alt="iPhone 6" class="img-responsive">
+                    <div class="product-info">
+                        <div class="col-sm-8">
+                            <h4>Service Title</h4>
+                            <p>Company Name</p>
+                        </div>
+                        <div class="col-sm-4 price">1500 $</div>
+                        <div class="clear"></div>
+                        <ul class="product-btns">
+                            <li>
+                                <a href="job-details.html#details" class="btn btn-default btn-grey"> <i class="fa fa-list"></i> Details</a>
+                            </li>
+                            <li>
+                                <a href="job-details.html#contact" class="btn btn-default btn-red-o"><i class="fa fa-shopping-cart"></i> Apply</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                -->
+            </div>
+        </div>
+    </section>
+
+
+    <section id="contact" class="wow fadeInUp bgc-one-top mts-section-wrapper mts-contact-section" data-wow-delay=".8s" style="margin-top:80px;margin-bottom:50px;">
+        <div class="container">
+            <div class="row">
+                <h1 class="title">Post a Service</h1>
+                <hr class="divider" style="width:50%;">
+                <p class="text-center">Fill out the submission form. Your submission will be reviewed by the administrator and your advert will be visible!</p>
+                <!-- Section Header End -->
+
+                <div class="mts-contact-details" style="margin-top:30px; padding: 50px;">
+
+                    <!-- Address Area End -->
+
+                    <!-- Contact Form -->
+                    <div class="col-md-12 col-sm-12 col-xs-12 mts-contact-form wow bounceInRight">
+                        <div id="contact-result"></div>
+                        <div id="contact-form">
+                        <form id="submitService" action="ipfs" method="post" enctype="multipart/form-data">
+                            <div class="mts-input-name mts-input-fields">
+                                <input type="text" name="title" id="title" placeholder="Title">
+                            </div>
+          						<div class="mts-input-name mts-input-fields">
+                          
+												<p>Upload image</p>
+                         
+                                <input type="file" name="image" style="border: none !important;"/>
+                               
+                            </div>
+
+
+                            <div class="mts-input-email mts-input-fields">
+                                <input type="text" name="company" id="company" placeholder="Company Name">
+                            </div>
+          						<div class="mts-input-name mts-input-fields">
+												<p>Upload description</p>
+                               
+
+                                <input type="file" name="description" style="border: none !important;"/>
+                    
+                            </div>
+                            <div class="mts-input-email mts-input-fields">
+                                <input type="text" name="compensation" id="compensation" placeholder="Compensation">
+                            </div>
+                            <input type="submit" value="Submit Service" id="submit-btn">
+                           
+                            </form>
+                        </div>
+                        
+                        <script>
+										
+	</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="wow fadeInUp" data-wow-delay=".8s">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-12">
+                        <a class="footer-logo" href="#">
+                            <img class="img-responsive" src="images/footer-logo.png" alt="">
+                        </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+	 <section id="modal-container"></section>    
+    <section id="status-modal-container"></section> 
+    <div id="applicationModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Application</h4>
+      </div>
+      <div class="modal-body">
+         <form id="submitApplication" action="ipfs" method="post" enctype="multipart/form-data">
+									<input type="hidden" id="application-service-id" />                            
+                            <div class="mts-input-name mts-input-fields">
+                                <input type="text" name="name" id="name" placeholder="Name">
+                            </div>
+                               <div class="mts-input-email mts-input-fields">
+                                <input type="text" name="email" id="email" placeholder="Contact Information">
+                            </div>
+          						<div class="mts-input-name mts-input-fields">
+                          
+												<p>Upload CV</p>
+                         
+                                <input type="file" name="cv" style="border: none !important;"/>
+                               
+                            </div>
+
+                            <input type="submit" value="Submit Application" class="btn btn-info" id="submit-application-btn">
+
+                            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+    
+  
+<script type="text/javascript">
+
+		Controller.init();
+
+</script>
+
+	
+</body>
+
+
+</html>

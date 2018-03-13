@@ -41,8 +41,51 @@ public class IPFSServlet extends HttpServlet{
 	
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-	    Part filePart = request.getPart("file"); 
-	    String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); 
+		response.setContentType("text/html");
+		Part image = request.getPart("image"); 
+		Part description = request.getPart("description");
+		Part cv = request.getPart("cv");
+		String json = "{";
+		if(cv != null){
+			Multihash result = pushToIpfs(cv);
+			json += "\"cv\": \"" + result+"\"";
+		}else{
+			if(image != null){
+				Multihash result = pushToIpfs(image);
+				json += "\"image\": \"" + result+"\"";
+			}
+			if(description != null){
+				Multihash result = pushToIpfs(description);
+				json += ",\"description\": \"" + result+"\"";
+			}
+		}
+		json += "}";
+	    
+	    PrintWriter writer = response.getWriter();
+	    writer.println(json);
+	    writer.flush();
+	}
+	
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
+		String hash = req.getParameter("hash");
+		if(hash!=null){
+			
+		     res.setContentType("description");
+	         res.setHeader("Content-disposition","attachment; filename=description.docx");
+
+			
+			Multihash filePointer = Multihash.fromBase58(hash);
+			byte[] fileContents = ipfs.cat(filePointer);
+			OutputStream out = res.getOutputStream();
+			out.write(fileContents, 0, fileContents.length);
+			out.flush();
+		}else{
+			
+		}
+	}
+	
+	private Multihash pushToIpfs(Part filePart) throws IOException{
+		String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString(); 
 	    InputStream fileContent = filePart.getInputStream();
 	    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
@@ -60,23 +103,8 @@ public class IPFSServlet extends HttpServlet{
 	    
 	    NamedStreamable.ByteArrayWrapper byteArrayWrapper = new NamedStreamable.ByteArrayWrapper(fileName, buffer.toByteArray());
 	    MerkleNode result = ipfs.add(byteArrayWrapper).get(0);
-	    
-	    PrintWriter writer = response.getWriter();
-	    writer.println(result.hash);
-	    writer.flush();
-	}
-	
-	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
-		String hash = req.getParameter("hash");
-		if(hash!=null){
-			Multihash filePointer = Multihash.fromBase58(hash);
-			byte[] fileContents = ipfs.cat(filePointer);
-			OutputStream out = res.getOutputStream();
-			out.write(fileContents, 0, fileContents.length);
-			out.flush();
-		}else{
-			
-		}
+	    System.out.println(result.hash);
+	    return result.hash;
 	}
 	
 }

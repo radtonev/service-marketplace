@@ -1,0 +1,5 @@
+127.0.0.1 - - [08/Mar/2018:11:35:14 +0200] "GET / HTTP/1.1" 404 1074
+127.0.0.1 - - [08/Mar/2018:11:36:45 +0200] "GET / HTTP/1.1" 404 1074
+127.0.0.1 - - [08/Mar/2018:11:36:49 +0200] "GET /ServiceMarketplace/ HTTP/1.1" 200 976
+127.0.0.1 - - [08/Mar/2018:11:36:59 +0200] "POST /ServiceMarketplace/ipfs HTTP/1.1" 200 58
+127.0.0.1 - - [08/Mar/2018:11:37:20 +0200] "GET /ServiceMarketplace/ipfs?hash=QmU3wUTA7rUQZcn53AN5keDrpPfMzLJv4McqPHAQVMfvVW HTTP/1.1" 200 57404

@@ -1,0 +1,122 @@
+var AccountViewController = (function () {
+	
+	function getTemplate(templateName, callback){
+		$.ajax({
+		 	 url: 'templates/'+templateName + ".handlebars",
+		 	 method: "GET",
+		 	 contentType: "text/plain",
+		 	 dataType: "text",
+		 	 success: function(templateHtml){
+					callback(templateHtml);		 	 
+		 	 }		
+		});	
+	}
+	
+	function init(){
+
+		$('#login-modal-btn').on('click',function(e){
+			getTemplate("load-wallet",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal());
+				$("#loadWallet").modal();
+				$('#access-acc-btn').on('click',function(){
+	  				var pass = $('#load-wallet-pass').val();
+	  				Marketplace.recoverWalletFromLocalStorage(pass,function(wallet){
+	  					$("#loadWallet").modal('toggle');
+	  					showSuccessModal("Hello, " + wallet.address);		
+	  				});
+	  			});
+			});
+			e.preventDefault();
+		});
+
+		$('#signup-modal-btn').on('click',function(e){
+			getTemplate("new-wallet",function(html){
+				getTemplate('recover-wallet',function(html2){
+					var bothModals = Handlebars.compile(html + html2);
+					$("#modal-container").html(bothModals());
+					$("#newWallet").modal();
+					$('#create-acc-btn').on('click',function(){
+	  					var pass = $('#new-wallet-pass').val();
+	  					Marketplace.createNewWallet(pass,function(wallet){
+	  						$("#newWallet").modal('toggle');
+	  						showSuccessModal("Keep your seed safe: <strong>" + wallet.mnemonic + "</strong>");		
+	  					});
+	  				});
+	  				$('#recover-acc-btn').on('click',function(){
+	  					var seed = $('#recover-wallet-seed').val();
+	  					var pass = $('#recover-wallet-pass').val();
+	  					Marketplace.recoverWalletFromSeedAndEncrypt(seed, pass,function(wallet){
+	  						$("#recoverWallet").modal('toggle');
+	  						showSuccessModal("Hello, " + wallet.address);		
+	  					});
+	  				});
+				});
+			});
+			e.preventDefault();
+		});
+	
+		$('#deposit-modal-btn').on('click',function(e){
+			getTemplate("deposit",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal({address: Marketplace.getWalletAddress()}));
+				$("#depositModal").modal();
+			});
+			e.preventDefault();
+		});
+	
+		$('#withdraw-modal-btn').on('click',function(e){
+			getTemplate("withdraw",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				
+				Marketplace.getWalletBalance().then(function(balance){				
+				$("#modal-container").html(loadWalletModal({balance: balance/1000000000000000000}));
+				$("#withdrawModal").modal();
+				$('#withdraw-btn').on('click',function(){
+					var address = $('#withdraw-address').val();
+					Marketplace.withdrawFromWallet(address,function(status){
+						$("#withdrawModal").modal('toggle');						
+						if(status == true){
+							showSuccessModal("You have successfully withdrawn your balance");
+						}else{
+							showErrorModal("Error occurred");
+						}				
+					});
+				});
+				});
+			});
+			e.preventDefault();
+		});	
+		
+
+
+	}
+
+	function showSuccessModal(message){
+			getTemplate("success",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#successModal").modal();
+			});
+	}	
+	
+	function showErrorModal(message){
+			getTemplate("error",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#errorModal").modal();
+			});
+	}		
+	
+
+	
+
+	return {
+		init: init,
+		showSuccessModal: showSuccessModal,
+		showErrorModal: showErrorModal,
+		openApplicationModal: openApplicationModal,
+		submitApplication: submitApplication,
+	}
+	
+})();

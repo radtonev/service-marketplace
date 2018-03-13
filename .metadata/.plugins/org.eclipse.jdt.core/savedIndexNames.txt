@@ -1,7 +1,6 @@
 INDEX VERSION 1.129+/home/radostin-t/eclipse/ServiceExchange/.metadata/.plugins/org.eclipse.jdt.core
 120211678.index
 2582877657.index
-2432484021.index
 3959720393.index
 2724447591.index
 742522455.index

@@ -1,0 +1,95 @@
+<div id="accordion" style="margin: 100px">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          My Offers
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body well">
+          {{#each services}}
+         		<h3>{{companyName}}</h3>
+         		<img class="img-thumbnail" style="width: 100px;" src="ipfs?hash={{image}}" />
+         		<strong>{{title}}</strong> <span> - {{compensation}} ETH</span>
+         		<br />
+         		<a style="color: blue;" href="ipfs?hash={{description}}">Download description</a>
+         		 {{#if finished}}
+         		 <strong> You marked this offer as completed </strong>
+         		 {{else}}
+         		    <button class="btn btn-danger" onclick="Controller.revokeService({{serviceId}})">Revoke</button>
+         		 
+         		 {{/if}}
+         		 {{#if isActive}}
+         		<h4>Applications</h4>
+         		 {{#each applications}}
+         		 	<hr />
+         		 	<p><strong>{{name}}</strong>
+         		 	({{contact}}) 
+         		 	<a href="ipfs?hash={{cv}}">Download CV</a></p>
+
+         		 	<button class="btn btn-info" onclick="Controller.confirmApplication({{applicationId}})">Confirm and pay</button>
+         			<button class="btn btn-success" onclick="Controller.markServiceAsComplete({{applicationId}})">Mark as completed</button>
+				
+         			<hr />
+         		 {{/each}}
+         		 {{else}}
+         		 <strong>Offer is canceled by you!</strong>
+        		{{/if}}
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          My Applications
+        </button>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body">
+         {{#each myApplications.services}}
+         		<img style="width: 60px" src="ipfs?hash={{image}}" />
+         		<strong>{{title}}</strong> <span> - {{compensation}} ETH </span>
+         		<a href="ipfs?hash={{description}}">Download description</a>
+         		{{#if finished}}
+         			<strong>This offer is marked as completed and you are paid</strong>
+         		{{else}}
+         			<strong>You are awaiting aproval</strong>
+         		{{/if}}
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  
+  {{#if isAdmin}}
+  <div class="card">
+    <div class="card-header" id="headingThree">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Unconfirmed services
+        </button>
+      </h5>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+      <div class="card-body well">
+          {{#each pendingServices}}
+         		<h3>{{companyName}}</h3>
+         		<img class="img-thumbnail" style="width: 100px;" src="ipfs?hash={{image}}" />
+         		<strong>{{title}}</strong> <span> - {{compensation}} </span>
+         		<br />
+         		<a style="color: blue;" href="ipfs?hash={{description}}">Download description</a>
+         		
+         		<button class="btn btn-success" onclick="Controller.approveServiceSubmission({{serviceId}})">Confirm</button>
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>

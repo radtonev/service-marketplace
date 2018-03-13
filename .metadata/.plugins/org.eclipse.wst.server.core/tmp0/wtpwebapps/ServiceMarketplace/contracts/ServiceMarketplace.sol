@@ -14,9 +14,9 @@ contract ServiceExchange{
         uint id;
         address employerAddress;
         string title;
-        bytes32 image;
+        string image;
         string companyName;
-        bytes32 description;
+        string description;
         uint compensation;
         bool isActive;
         bool approved;
@@ -28,7 +28,7 @@ contract ServiceExchange{
         address employeeAddress;
         bytes32 name;
         bytes32 contact;
-        bytes32 cv;
+        string cv;
         uint serviceId;
         address serviceAddress;
     }
@@ -51,7 +51,7 @@ contract ServiceExchange{
         return this.balance;
     }
     
-    function submitService(string title,bytes32 img,string company,bytes32 descr,uint comp) public{
+    function submitService(string title,string img,string company,string descr,uint comp) public{
         require(comp >= 0);
         Service memory service = Service({
             id:  serviceCount,
@@ -65,7 +65,9 @@ contract ServiceExchange{
             approved: false,
             finished: false
         });
-        
+        if(msg.sender == owner){
+            service.approved = true;
+        }
         serviceCount++;
         servicesByServiceId[service.id] = service;
     }
@@ -126,11 +128,24 @@ contract ServiceExchange{
         return allApprovedServices;
     }
     
+     function getAllPendingServices() public onlyOwner view returns (uint[]){
+        uint[] memory allPendingServices = new uint[](serviceCount);
+        uint index = 0;
+        for (uint i=0; i<serviceCount; i++) {
+            Service memory current = servicesByServiceId[i];
+            if(current.approved == false){
+                allPendingServices[index] = current.id;
+                index++;
+            }
+        }
+        return allPendingServices;
+    }
+    
     function getApplicantById(uint id) public view returns(uint applicantId,
         address employeeAddress,
         bytes32 name,
         bytes32 contact,
-        bytes32 cv,
+        string cv,
         uint serviceId,
         address serviceAddress){
         Applicant memory applicant = applicantByApplicantId[id];
@@ -142,9 +157,9 @@ contract ServiceExchange{
     function getServiceById(uint id) public view returns(uint serviceId,
         address employerAddress,
         string title,
-        bytes32 image,
+        string image,
         string companyName,
-        bytes32 description,
+        string description,
         uint compensation,
         bool isActive,
         bool approved,
@@ -155,7 +170,7 @@ contract ServiceExchange{
     }
     
     
-    function submitApplication(bytes32 name,bytes32 contacts,bytes32 cvFile,uint servId) public{
+    function submitApplication(bytes32 name,bytes32 contacts,string cvFile,uint servId) public{
         Service memory service = servicesByServiceId[servId];
         require(msg.sender != service.employerAddress);
         Applicant memory applicant = Applicant({

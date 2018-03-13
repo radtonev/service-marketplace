@@ -1,0 +1,64 @@
+require(['jquery','ethers'], function($,ethers) {
+
+
+var userWallet = undefined;
+var networkProvider = undefined;
+var LOCAL_STORAGE_KEY = "jobs-marketplace-user-wallet";	
+var ROPSTEN_INFURA_API_KEY = "RzjxoWLCXrwtbSr84BJA";
+
+document.onload = function () {
+	
+	if (typeof(Storage) !== "undefined") {
+       var existingUserData = localStorage.getItem(LOCAL_STORAGE_KEY);
+       
+		 if(existingUserData){
+		 	//var mnemonic = "radar blur cabbage chef fix engine embark joy scheme fiction master release";
+			//userWallet = Wallet.fromMnemonic(mnemonic);
+		 }else{
+			//Open modal
+			//$("#myModal").modal();	 
+		 }       
+       
+	} else {
+      alert("Sorry! No Web Storage support!");
+	}
+};
+
+function createNewWallet(password, callback){
+	userWallet = ethers.Wallet.createRandom();
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromLocalStorage(password, callback){
+	var encryptedWalletJson = localStorage.getItem(LOCAL_STORAGE_KEY);
+	ethers.Wallet.fromEncryptedWallet(JSON.parse(encryptedWalletJson), password).then(function(wallet) {
+		userWallet = wallet;
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;	
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromSeedAndEncrypt(seed, password, callback){
+	userWallet = ethers.Wallet.fromMnemonic(seed);
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		callback(userWallet);
+	});
+}
+
+
+});
+
+
+

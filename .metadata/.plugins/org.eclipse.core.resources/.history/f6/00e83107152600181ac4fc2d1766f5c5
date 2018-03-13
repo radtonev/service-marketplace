@@ -1,0 +1,73 @@
+<div id="accordion" style="margin: 100px">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h5 class="mb-0">
+        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          My Offers
+        </button>
+      </h5>
+    </div>
+
+    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body well">
+          {{#each services}}
+         		<h3>{{companyName}}</h3>
+         		<img class="img-thumbnail" style="width: 100px;" src="ipfs?hash={{image}}" />
+         		<strong>{{title}}</strong> <span> - {{compensation}} </span>
+         		<br />
+         		<a style="color: blue;" href="ipfs?hash={{description}}">Download description</a>
+         		
+         		<button class="btn btn-danger" onclick="Marketplace.revokeService({{serviceId}})">Revoke</button>
+         		 {{#each applications}}
+         		 	<strong>{{title}}</strong>
+         		 	<p>{{address}}</p>
+         		 	<a href="ipfs/{{cv}}">Download CV</a>
+         		 {{/each}}
+         		 <hr />
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          My Applications
+        </button>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body">
+         {{#each offers}}
+         		<strong>{{title}}</strong> <span> - {{compensation}} </span>
+         		<p>{{address}}</p>
+         		<a href="{{description}}">Download description</a>
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  
+  {{#if isAdmin}}
+  <div class="card">
+    <div class="card-header" id="headingThree">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Unconfirmed services
+        </button>
+      </h5>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+      <div class="card-body">
+          {{#each pendingServices}}
+         		<strong>{{title}}</strong> <span> - {{compensation}} </span>
+         		<p>{{address}}</p>
+         		<a href="{{description}}">Download description</a><br />
+         		<!--<button id="pending-service-{{serviceId}} class=" btn confirm-service-btn"">Confirm Service</button>-->
+          {{/each}}
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>

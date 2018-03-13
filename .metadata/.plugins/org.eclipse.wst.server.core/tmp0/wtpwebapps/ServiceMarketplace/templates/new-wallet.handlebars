@@ -1,0 +1,33 @@
+<div id="newWallet" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create new account. Please enter a secure password:</h4>
+      </div>
+      <div class="modal-body">
+        <label>Password: </label><input type="text" id="new-wallet-pass"/>
+        <div>
+				<button type="button" class="btn btn-info btn-lg" id="create-acc-btn">Create Account</button>  
+				<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#recoverWallet" onclick="$('#newWallet').modal('toggle');">Recover Account</button>      
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>	
+
+$('#create-acc-btn').on('click',function(){
+	  			var pass = $('#new-wallet-pass').val();
+	  			createNewWallet(pass,function(wallet){
+	  					console.log(wallet);
+	  					$("#newWallet").modal('toggle');
+	  					$('#success-modal-message').html("Keep your seed safe: <strong>" + wallet.mnemonic + "</strong>")
+						$('#successModal').modal();  			
+	  			});
+	  		});

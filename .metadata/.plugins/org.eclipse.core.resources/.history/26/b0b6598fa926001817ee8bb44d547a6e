@@ -1,0 +1,21 @@
+
+                <div class="col-sm-3 wow fadeInUp product" data-wow-delay=".8s">                   
+                    <img src="ipfs?hash={{image}}" class="img-responsive" />
+                    <div class="product-info">
+                        <div class="col-sm-8">
+                            <h4>{{title}}</h4>
+                            <p>{{companyName}}</p>
+                        </div>
+                        <div class="col-sm-4 price">{{compensation}}ETH</div>
+                        <div class="clear"></div>
+                        <ul class="product-btns">
+                            <li>
+                                <a href="ipfs?hash={{description}}" class="btn btn-default btn-grey"> <i class="fa fa-list"></i> Description</a>
+                            </li>
+                            <li>
+                                <a href="#" class="btn btn-default btn-red-o" onclick="Controller.openApplicationModal({{serviceId}})"><i class="fa fa-shopping-cart"></i> Apply</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+

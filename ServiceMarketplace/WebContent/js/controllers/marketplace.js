@@ -1,0 +1,787 @@
+//init system, provide basic functionalites for the markketplace
+
+var Marketplace = (function(){
+
+var userWallet = undefined;
+var networkProvider = undefined;
+var contract = undefined;
+var LOCAL_STORAGE_KEY = "jobs-marketplace-user-wallet";	
+var ROPSTEN_INFURA_API_KEY = "RzjxoWLCXrwtbSr84BJA";
+var CONTRACT_ADDRESS = "0xB4236CA11b2f7d341a61b3d600e02041bEaE2388";//"0x4658A7fCb48E9ec1c334da3c930b85656614aB38";//"0xc223549f44c55B2aeF5e6373d65da7650BE180b9";
+var CONTRACT_ABI = [
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyApplicationsAsEmployee",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "getApplicantById",
+		"outputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			},
+			{
+				"name": "employeeAddress",
+				"type": "address"
+			},
+			{
+				"name": "name",
+				"type": "bytes32"
+			},
+			{
+				"name": "contact",
+				"type": "bytes32"
+			},
+			{
+				"name": "cv",
+				"type": "string"
+			},
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			},
+			{
+				"name": "serviceAddress",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyApplicationsAsEmployer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "addr",
+				"type": "address"
+			}
+		],
+		"name": "sendBalance",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			}
+		],
+		"name": "confirmApplicationAndDeposit",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "approveServiceSubmission",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			}
+		],
+		"name": "markServiceAsComplete",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getAllApprovedServices",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getAllPendingServices",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyServicesAsEmployer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "name",
+				"type": "bytes32"
+			},
+			{
+				"name": "contacts",
+				"type": "bytes32"
+			},
+			{
+				"name": "cvFile",
+				"type": "string"
+			},
+			{
+				"name": "servId",
+				"type": "uint256"
+			}
+		],
+		"name": "submitApplication",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "getServiceById",
+		"outputs": [
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			},
+			{
+				"name": "employerAddress",
+				"type": "address"
+			},
+			{
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"name": "image",
+				"type": "string"
+			},
+			{
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"name": "compensation",
+				"type": "uint256"
+			},
+			{
+				"name": "isActive",
+				"type": "bool"
+			},
+			{
+				"name": "approved",
+				"type": "bool"
+			},
+			{
+				"name": "finished",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"name": "img",
+				"type": "string"
+			},
+			{
+				"name": "company",
+				"type": "string"
+			},
+			{
+				"name": "descr",
+				"type": "string"
+			},
+			{
+				"name": "comp",
+				"type": "uint256"
+			}
+		],
+		"name": "submitService",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalanceForAccount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			}
+		],
+		"name": "revokeService",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	}
+];
+
+
+
+function createNewWallet(password, callback){
+	userWallet = ethers.Wallet.createRandom();
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromLocalStorage(password, callback){
+	var encryptedWalletJson = localStorage.getItem(LOCAL_STORAGE_KEY);
+	ethers.Wallet.fromEncryptedWallet(JSON.parse(encryptedWalletJson), password).then(function(wallet) {
+		userWallet = wallet;
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;	
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromSeedAndEncrypt(seed, password, callback){
+	userWallet = ethers.Wallet.fromMnemonic(seed);
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function getWalletAddress(){
+	if (userWallet) {
+		return userWallet.address;	
+	}
+}
+
+function getWalletBalance(){
+	if (userWallet) {
+		return userWallet.getBalance();	
+	}
+}
+
+function withdrawFromWallet(address, callback){
+	Promise.all([
+	    userWallet.getBalance(),
+	    networkProvider.getGasPrice(),
+	    networkProvider.getCode(address)
+	]).then(function(results) {
+	    var balance = results[0];
+	    var gasPrice = results[1];
+	    var code = results[2];
+
+	    if (code !== '0x') {
+	        throw new Error('Should not send to a contract');
+	    }
+
+	    var gasLimit = 21000;
+
+	    var value = balance.sub(gasPrice.mul(gasLimit))
+
+	    userWallet.send(address, value, {gasLimit: gasLimit}).then(function(transaction) {
+	        console.log(transaction);
+	        callback(transaction);
+	    });
+	});
+}
+
+function submitService(title, img, company, descr, comp, callback){
+	var overrideOptions = {
+		    gasLimit: 1500000,
+	};
+
+	contract.submitService(title,img, company, descr, ethers.utils.parseEther(comp),overrideOptions).then(function(res){
+		console.log(res);
+		callback(res);
+	});
+}
+
+function submitApplication(name, contacts, cvFile, servId, callback){
+	var overrideOptions = {
+		    gasLimit: 1500000,
+	};
+	contract.submitApplication(ethers.utils.toUtf8Bytes(name), ethers.utils.toUtf8Bytes(contacts), cvFile, servId,overrideOptions).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+function approveServiceSubmission(id, callback){
+	//Check if admin
+	var overrideOptions = {
+		    gasLimit: 1500000,
+	};
+	$.ajax({
+		url: "admin",
+		method: "GET",
+		success: function(adminAddress){
+			if(userWallet.address == adminAddress){
+				contract.approveServiceSubmission(id,overrideOptions).then(function (response) {
+					callback(response.hash);
+			 	});
+			}else{
+				callback("You do not have permissions to approve service submision")
+			}
+		}
+		
+	})
+}
+
+function getMyServicesAsEmployer(callback){
+	contract.getMyServicesAsEmployer().then(function(resp){
+		var myServicesArray = resp[0];
+		var promises = [];
+		for(var i = 0;i<myServicesArray.length;i++){
+			var serviceId = myServicesArray[i].toNumber();
+			if(serviceId > 0){
+				promises.push(getServiceById(serviceId));
+			}
+		}
+		
+		Promise.all(promises).then(function(result){
+			var services = [];
+			for(var i = 0; i<result.length;i++){
+				var data = result[i];
+				
+				var service = {
+						 serviceId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         title: data[2],
+				         image: data[3],
+				         companyName: data[4],
+				         description: data[5],
+				         compensation: ethers.utils.formatEther(data[6].toString()),
+				         isActive: data[7],
+				         approved: data[8],
+				         finished: data[9]
+				};
+				
+				services.push(service);
+			}
+			callback(services);
+		});
+	});
+}
+
+function getMyApplicationsAsEmployee(callback){
+   contract.getMyApplicationsAsEmployee().then(function(resp){
+		var myApplicationsArray = resp[0];
+		var promises = [];
+		for(var i = 0;i<myApplicationsArray.length;i++){
+			var appId = myApplicationsArray[i].toNumber();
+		
+			if(appId > 0){
+				promises.push(getApplicantById(appId));
+			}
+		}
+		
+		Promise.all(promises).then(function(result){
+			var apps = [];
+			for(var i = 0; i<result.length;i++){
+				var data = result[i];
+
+				var application = {
+						 applicationId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         name: ethers.utils.toUtf8String(data[2]),
+				         contact: ethers.utils.toUtf8String(data[3]),
+				         cv: data[4],
+				         serviceId: data[5].toNumber(),
+				         serviceAddr: data[6]
+				};
+	
+				apps.push(application);
+			}
+				//Get services info
+				var promises = [];
+				for(var i = 0;i<apps.length;i++){
+					var srvId = apps[i].serviceId;
+					promises.push(getServiceById(srvId));
+				}
+
+				Promise.all(promises).then(function(response){
+					var services = [];
+					for(var i = 0; i<response.length;i++){
+						var data = response[i];
+						
+						var service = {
+								 serviceId: data[0].toNumber(),
+						         employerAddress: data[1],
+						         title: data[2],
+						         image: data[3],
+						         companyName: data[4],
+						         description: data[5],
+						         compensation: ethers.utils.formatEther(data[6].toString()),
+						         isActive: data[7],
+						         approved: data[8],
+						         finished: data[9]
+						};
+					
+						services.push(service);
+					}
+					
+			
+					callback({services: services, applications: apps});
+					
+				});
+			
+			
+		});
+	});
+   
+   
+}
+
+function getMyApplicationsAsEmployer(callback){
+	contract.getMyApplicationsAsEmployer().then(function(resp){
+		var myApplicationsArray = resp[0];
+		
+		var promises = [];
+		for(var i = 0;i<myApplicationsArray.length;i++){
+			var appId = myApplicationsArray[i].toNumber();
+			
+			if(appId > 0){
+				promises.push(getApplicantById(appId));
+			}
+		}
+		
+		Promise.all(promises).then(function(result){
+			var apps = [];
+			for(var i = 0; i<result.length;i++){
+				var data = result[i];
+				
+				var application = {
+						 applicationId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         name: ethers.utils.toUtf8String(data[2]),
+				         contact: ethers.utils.toUtf8String(data[3]),
+				         cv: data[4],
+				         serviceId: data[5].toNumber(),
+				         serviceAddr: data[6]
+				};
+				
+				apps.push(application);
+			}
+			callback(apps);
+		});
+	});
+}
+ 
+function getAllApprovedServices(callback){
+   contract.getAllApprovedServices().then(function(resp){
+		var myServicesArray = resp[0];
+		var promises = [];
+		for(var i = 0;i<myServicesArray.length;i++){
+			var serviceId = myServicesArray[i].toNumber();
+			if(serviceId > 0){
+				promises.push(getServiceById(serviceId));
+			}
+		}
+		
+		Promise.all(promises).then(function(result){
+			var services = [];
+			for(var i = 0; i<result.length;i++){
+				var data = result[i];
+				
+				var service = {
+						 serviceId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         title: data[2],
+				         image: data[3],
+				         companyName: data[4],
+				         description: data[5],
+				         compensation: ethers.utils.formatEther(data[6].toString()),
+				         isActive: data[7],
+				         approved: data[8],
+				         finished: data[9]
+				};
+
+				if(service.isActive == true && service.finished == false){
+					services.push(service);
+				}
+			}
+			callback(services);
+		});
+	});
+}
+  
+function getAllPendingServices(callback){
+	   contract.getAllPendingServices().then(function(resp){
+			var myServicesArray = resp[0];
+			var promises = [];
+			for(var i = 0;i<myServicesArray.length;i++){
+				var serviceId = myServicesArray[i].toNumber();
+				if(serviceId > 0){
+					promises.push(getServiceById(serviceId));
+				}
+			}
+			
+			Promise.all(promises).then(function(result){
+				var services = [];
+				for(var i = 0; i<result.length;i++){
+					var data = result[i];
+					
+					var service = {
+							 serviceId: data[0].toNumber(),
+					         employerAddress: data[1],
+					         title: data[2],
+					         image: data[3],
+					         companyName: data[4],
+					         description: data[5],
+					         compensation: ethers.utils.formatEther(data[6].toString()),
+					         isActive: data[7],
+					         approved: data[8],
+					         finished: data[9]
+					};
+					console.log(service);
+					services.push(service);
+				}
+				callback(services);
+			});
+		});
+}  
+
+
+function getApplicantById(id){
+   return contract.getApplicantById(id);
+}
+
+function getServiceById(id){
+	return contract.getServiceById(id);
+}
+
+function confirmApplicationAndDeposit(applicantId ,callback){
+	getApplicantById(applicantId).then(function(data){
+		
+			var application = {
+						 applicationId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         name: ethers.utils.toUtf8String(data[2]),
+				         contact: ethers.utils.toUtf8String(data[3]),
+				         cv: data[4],
+				         serviceId: data[5].toNumber(),
+				         serviceAddr: data[6]
+			};
+
+			getServiceById(application.serviceId).then(function(data){
+				var service = {
+						 serviceId: data[0].toNumber(),
+				         employerAddress: data[1],
+				         title: data[2],
+				         image: data[3],
+				         companyName: data[4],
+				         description: data[5],
+				         compensation: ethers.utils.formatEther(data[6].toString()),
+				         isActive: data[7],
+				         approved: data[8],
+				         finished: data[9]
+				};
+				
+				var transactionOptions = {
+					    gasLimit: 1500000,
+					    value: ethers.utils.parseEther(service.compensation)
+				};
+				
+				contract.confirmApplicationAndDeposit(application.applicationId,transactionOptions).then(function(response){
+					callback(response);
+				});
+			});	
+			
+	});
+	
+}
+
+function markServiceAsComplete(applicantId,callback){
+	var overrideOptions = {
+		    gasLimit: 1500000,
+	};
+	contract.markServiceAsComplete(applicantId,overrideOptions).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+function revokeService(serviceId,callback){
+ 	//TODO: Check if you are the service owner
+	var overrideOptions = {
+		    gasLimit: 1500000,
+	};
+	contract.revokeService(serviceId,overrideOptions).then(function (response) {
+ 		callback(response);
+ 	});
+}
+
+function getBalanceForAccount(callback){
+ 	contract.getBalanceForAccount().then(function (response) {
+ 		callback(response);
+ 	});
+ 
+}
+
+function sendBalance(address,callback){
+	contract.sendBalance(address).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+
+
+return {
+	createNewWallet: createNewWallet,
+	recoverWalletFromLocalStorage: recoverWalletFromLocalStorage,
+	recoverWalletFromSeedAndEncrypt, recoverWalletFromSeedAndEncrypt,
+	getWalletAddress: getWalletAddress,
+	withdrawFromWallet: withdrawFromWallet,
+	getWalletBalance: getWalletBalance,
+	submitService: submitService,
+	submitApplication: submitApplication,
+	approveServiceSubmission: approveServiceSubmission,
+	getMyServicesAsEmployer: getMyServicesAsEmployer,
+	getMyApplicationsAsEmployee: getMyApplicationsAsEmployee,
+	getMyApplicationsAsEmployer: getMyApplicationsAsEmployer,
+	getAllApprovedServices: getAllApprovedServices,
+	getApplicantById: getApplicantById,
+	getServiceById: getServiceById,
+	confirmApplicationAndDeposit: confirmApplicationAndDeposit,
+	markServiceAsComplete: markServiceAsComplete,
+	revokeService: revokeService,
+	getBalanceForAccount: getBalanceForAccount,
+	sendBalance: sendBalance,
+	getAllPendingServices: getAllPendingServices
+}
+
+
+})();
+
+
+

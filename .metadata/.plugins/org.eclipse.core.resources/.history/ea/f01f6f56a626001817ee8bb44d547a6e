@@ -1,0 +1,225 @@
+<!DOCTYPE html5>
+<html>
+<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/font-awesome.min.css">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/animate.css">
+        <link rel="stylesheet" href="css/responsive.css">
+        <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.2.min.js"><\/script>')</script>
+        <script src="js/bootstrap.min.js"></script>
+        	<script  src="js/ethers-v2.min.js" type="text/javascript"></script>
+</head>
+<body>
+	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#newWallet">Sign up</button>
+	<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#loadWallet">Login</button>
+	<button id="deposit-btn" type="button" class="btn btn-info btn-lg">Deposit</button>
+	<button id="withdraw-btn" type="button" class="btn btn-info btn-lg">Withdraw</button>
+
+	
+	<!-- Modal For new wallet-->
+<div id="newWallet" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Create new account. Please enter a secure password:</h4>
+      </div>
+      <div class="modal-body">
+        <label>Password: </label><input type="text" id="new-wallet-pass"/>
+        <div>
+				<button type="button" class="btn btn-info btn-lg" id="create-acc-btn">Create Account</button>  
+				<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#recoverWallet" onclick="$('#newWallet').modal('toggle');">Recover Account</button>      
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>	
+	
+	
+	<!-- Modal For recover wallet-->
+<div id="recoverWallet" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Please enter your seed and new secure password:</h4>
+      </div>
+      <div class="modal-body">
+        <label>Seed: </label><input type="text" id="recover-wallet-seed" />
+        <label>Password: </label><input type="text" id="recover-wallet-pass" />
+        <div>
+				<button type="button" class="btn btn-info btn-lg" id="recover-acc-btn">Recover Account</button>        
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Modal For load wallet-->
+<div id="loadWallet" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Please enter your password</h4>
+      </div>
+      <div class="modal-body">
+        <label>Password: </label><input id="load-wallet-pass" type="text" />
+        <div>
+				<button type="button" class="btn btn-info btn-lg" id="access-acc-btn">Access Account</button>        
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal For load wallet-->
+<div id="depositModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Please deposit ethers to this address:</h4>
+      </div>
+      <div class="modal-body">
+        <p id="deposit-address"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal For load wallet-->
+<div id="withdrawModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Please deposit ethers to this address:</h4>
+      </div>
+      <div class="modal-body">
+      	 <p>Available Balance:</p>
+      	 <p id="current-balance"> </p>
+         <label>Please enter password: </label><input type="text" /><br />
+         <label>Withdraw address: </label><input type="text" />
+        
+        <div>
+			<button type="button" class="btn btn-info btn-lg">Withdraw</button>        
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal For load wallet-->
+<div id="successModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Success</h4>
+      </div>
+      <div class="modal-body">
+       	<p id="success-modal-message"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+	  <script src="script.js" type="application/javascript"></script>
+	  
+	  <script type="text/javascript" >
+	  		$('#create-acc-btn').on('click',function(){
+	  			var pass = $('#new-wallet-pass').val();
+	  			createNewWallet(pass,function(wallet){
+	  					console.log(wallet);
+	  					$("#newWallet").modal('toggle');
+	  					$('#success-modal-message').html("Keep your seed safe: <strong>" + wallet.mnemonic + "</strong>")
+						$('#successModal').modal();  			
+	  			});
+	  		});
+	  		$('#recover-acc-btn').on('click',function(){
+	  			var seed = $('#recover-wallet-seed').val();
+	  			var pass = $('#recover-wallet-pass').val();
+	  			recoverWalletFromSeedAndEncrypt(seed, pass,function(wallet){
+	  					console.log(wallet);
+	  					$("#recoverWallet").modal('toggle');
+	  					$('#success-modal-message').html("Hello, " + wallet.address);
+						$('#successModal').modal();  			
+	  			});
+	  			
+	  		});
+	  		$('#access-acc-btn').on('click',function(){
+	  			var pass = $('#load-wallet-pass').val();
+	  			recoverWalletFromLocalStorage(pass,function(wallet){
+	  					console.log(wallet);
+	  					$("#loadWallet").modal('toggle');
+	  					$('#success-modal-message').html("Hello, " + wallet.address);
+						$('#successModal').modal();  			
+	  			});
+	  		});
+	  	
+	  		$('#deposit-btn').on('click',function(){
+	  			if(userWallet){
+	  				$("#deposit-address").html("<strong>" + userWallet.address + "</strong>");
+	  				$("#depositModal").modal();
+	  			}else{
+	  				alert("You are not loged in! Plase login to deposit");
+	  			}
+	  		});
+	  		
+	  		$('#withdraw-btn').on('click',function(){
+	  			if(userWallet){
+	  				userWallet.getBalance().then(function(balance){
+	  					console.log(balance);
+	  					$("#current-balance").html("<strong>" + balance + "</strong>");
+		  				$("#withdrawModal").modal();
+	  				});
+	  			
+	  			}else{
+	  				alert("You are not loged in! Plase login to withdraw");
+	  			}
+	  		});
+	  </script>
+</body>
+</html>

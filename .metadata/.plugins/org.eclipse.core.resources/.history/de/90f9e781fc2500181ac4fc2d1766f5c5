@@ -1,0 +1,567 @@
+//init system, provide basic functionalites for the markketplace
+
+var Marketplace = (function(){
+
+var userWallet = undefined;
+var networkProvider = undefined;
+var contract = undefined;
+var LOCAL_STORAGE_KEY = "jobs-marketplace-user-wallet";	
+var ROPSTEN_INFURA_API_KEY = "RzjxoWLCXrwtbSr84BJA";
+var CONTRACT_ADDRESS = "0xc223549f44c55B2aeF5e6373d65da7650BE180b9";
+var CONTRACT_ABI = [
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getAllApprovedServices",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "getApplicantById",
+		"outputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			},
+			{
+				"name": "employeeAddress",
+				"type": "address"
+			},
+			{
+				"name": "name",
+				"type": "bytes32"
+			},
+			{
+				"name": "contact",
+				"type": "bytes32"
+			},
+			{
+				"name": "cv",
+				"type": "bytes32"
+			},
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			},
+			{
+				"name": "serviceAddress",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalanceForAccount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyApplicationsAsEmployee",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyApplicationsAsEmployer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "getServiceById",
+		"outputs": [
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			},
+			{
+				"name": "employerAddress",
+				"type": "address"
+			},
+			{
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"name": "image",
+				"type": "bytes32"
+			},
+			{
+				"name": "companyName",
+				"type": "string"
+			},
+			{
+				"name": "description",
+				"type": "bytes32"
+			},
+			{
+				"name": "compensation",
+				"type": "uint256"
+			},
+			{
+				"name": "isActive",
+				"type": "bool"
+			},
+			{
+				"name": "approved",
+				"type": "bool"
+			},
+			{
+				"name": "finished",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMyServicesAsEmployer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "id",
+				"type": "uint256"
+			}
+		],
+		"name": "approveServiceSubmission",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			}
+		],
+		"name": "confirmApplicationAndDeposit",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"name": "img",
+				"type": "bytes32"
+			},
+			{
+				"name": "company",
+				"type": "string"
+			},
+			{
+				"name": "descr",
+				"type": "bytes32"
+			},
+			{
+				"name": "comp",
+				"type": "uint256"
+			}
+		],
+		"name": "submitService",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "name",
+				"type": "bytes32"
+			},
+			{
+				"name": "contacts",
+				"type": "bytes32"
+			},
+			{
+				"name": "cvFile",
+				"type": "bytes32"
+			},
+			{
+				"name": "servId",
+				"type": "uint256"
+			}
+		],
+		"name": "submitApplication",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "addr",
+				"type": "address"
+			}
+		],
+		"name": "sendBalance",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "serviceId",
+				"type": "uint256"
+			}
+		],
+		"name": "revokeService",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "applicantId",
+				"type": "uint256"
+			}
+		],
+		"name": "markServiceAsComplete",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	}
+];
+
+
+
+
+function createNewWallet(password, callback){
+	userWallet = ethers.Wallet.createRandom();
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromLocalStorage(password, callback){
+	var encryptedWalletJson = localStorage.getItem(LOCAL_STORAGE_KEY);
+	ethers.Wallet.fromEncryptedWallet(JSON.parse(encryptedWalletJson), password).then(function(wallet) {
+		userWallet = wallet;
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;	
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function recoverWalletFromSeedAndEncrypt(seed, password, callback){
+	userWallet = ethers.Wallet.fromMnemonic(seed);
+	userWallet.encrypt(password).then(function(encryptedWallet){
+		localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(encryptedWallet));	
+		var network = ethers.providers.networks.ropsten;
+		networkProvider = new ethers.providers.InfuraProvider(network, ROPSTEN_INFURA_API_KEY);
+		userWallet.provider = networkProvider;
+		contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userWallet);
+		callback(userWallet);
+	});
+}
+
+function getWalletAddress(){
+	if (userWallet) {
+		return userWallet.address;	
+	}
+}
+
+function getWalletBalance(){
+	if (userWallet) {
+		return userWallet.getBalance();	
+	}
+}
+
+function withdrawFromWallet(address, callback){
+	Promise.all([
+	    userWallet.getBalance(),
+	    networkProvider.getGasPrice(),
+	    networkProvider.getCode(address)
+	]).then(function(results) {
+	    var balance = results[0];
+	    var gasPrice = results[1];
+	    var code = results[2];
+
+	    if (code !== '0x') {
+	        throw new Error('Should not send to a contract');
+	    }
+
+	    var gasLimit = 21000;
+
+	    var value = balance.sub(gasPrice.mul(gasLimit))
+
+	    userWallet.send(address, value, {gasLimit: gasLimit}).then(function(transaction) {
+	        console.log(transaction);
+	        callback(transaction);
+	    });
+	});
+}
+
+function submitService(title, img, company, descr, comp, callback){
+	var overrideOptions = {
+		    gasLimit: 250000,
+	};
+
+	contract.submitService(title,ethers.utils.toUtf8Bytes(img), company, ethers.utils.toUtf8Bytes(descr), ethers.utils.parseEther(comp), overrideOptions).then(function(res){
+		console.log(res);
+		callback(res);
+	});
+}
+
+function submitApplication(name, contacts, cvFile, servId, callback){
+	var overrideOptions = {
+		    gasLimit: 250000,
+	};
+	contract.submitApplication(name, contacts, cvFile, servId).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+function approveServiceSubmission(id, callback){
+	//Check if admin
+	var overrideOptions = {
+		    gasLimit: 250000,
+	};
+	$.ajax({
+		url: "/admin",
+		method: "GET",
+		success: function(adminAddress){
+			if(userWallet.address == adminAddress){
+				contract.approveServiceSubmission(id,overrideOptions).then(function (response) {
+					console.log(response);
+			 	});
+			}else{
+				console.log("You do not have permissions to approve service submision")
+			}
+		}
+		
+	})
+}
+
+function getMyServicesAsEmployer(callback){
+	contract.getMyServicesAsEmployer().then(function(res){
+		var myServicesArray = resp[0];
+		var promises = [];
+		for(var i = 0;i<myServicesArray.length;i++){
+			var serviceId = myServicesArray[i].toNumber();
+			if(serviceId > 0){
+				promises.push(getServiceById(serviceId));
+			}
+		}
+		
+		Promise.all(promises).then(function(data){
+			callback(data);
+		});
+	});
+}
+
+function getMyApplicationsAsEmployee(callback){
+   contract.getMyApplicationsAsEmployee().then(function (response) {
+	   console.log(response);
+	   callback(response);
+   });
+}
+
+function getMyApplicationsAsEmployer(callback){
+ 	contract.getMyApplicationsAsEmployer().then(function (response) {
+ 		 console.log(response);
+ 		 callback(response);
+ 	});
+}
+ 
+function getAllApprovedServices(callback){
+   contract.getAllApprovedServices().then(function (response) {
+		 console.log(response);
+ 		 callback(response);
+   });
+}
+  
+  
+function getApplicantById(id,callback){
+   contract.getApplicantById(id).then(function (response) {
+		 console.log(response);
+ 		 callback(response);
+   });
+}
+
+function getServiceById(id){
+	return contract.getServiceById(id);
+}
+
+function confirmApplicationAndDeposit(applicantId, etherAmount ,callback){
+	var overrideOptions = {
+		    gasLimit: 250000,
+		    value: ethers.utils.parseEther(etherAmount)
+	};
+	contract.confirmApplicationAndDeposit(applicantId).then(function (response) {
+		 
+ 	});
+}
+
+function markServiceAsComplete(applicantId,callback){
+	var overrideOptions = {
+		    gasLimit: 250000,
+	};
+	contract.markServiceAsComplete(applicantId,overrideOptions).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+function revokeService(serviceId,callback){
+ 	//TODO: Check if you are the service owner
+	var overrideOptions = {
+		    gasLimit: 250000,
+	};
+	contract.revokeService(serviceId,overrideOptions).then(function (response) {
+ 		console.log(response);
+ 	});
+}
+
+function getBalanceForAccount(callback){
+ 	contract.getBalanceForAccount().then(function (response) {
+ 		callback(response);
+ 	});
+ 
+}
+
+function sendBalance(address,callback){
+	contract.sendBalance(address).then(function (response) {
+		console.log(response);
+		callback(response);
+ 	});
+}
+
+return {
+	createNewWallet: createNewWallet,
+	recoverWalletFromLocalStorage: recoverWalletFromLocalStorage,
+	recoverWalletFromSeedAndEncrypt, recoverWalletFromSeedAndEncrypt,
+	getWalletAddress: getWalletAddress,
+	withdrawFromWallet: withdrawFromWallet,
+	getWalletBalance: getWalletBalance,
+	submitService: submitService,
+	submitApplication: submitApplication,
+	approveServiceSubmission: approveServiceSubmission,
+	getMyServicesAsEmployer: getMyServicesAsEmployer,
+	getMyApplicationsAsEmployee: getMyApplicationsAsEmployee,
+	getMyApplicationsAsEmployer: getMyApplicationsAsEmployer,
+	getAllApprovedServices: getAllApprovedServices,
+	getApplicantById: getApplicantById,
+	getServiceById: getServiceById,
+	confirmApplicationAndDeposit: confirmApplicationAndDeposit,
+	markServiceAsComplete: markServiceAsComplete,
+	revokeService: revokeService,
+	getBalanceForAccount: getBalanceForAccount,
+	sendBalance: sendBalance
+}
+
+
+})();
+
+
+

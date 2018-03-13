@@ -1,0 +1,37 @@
+<div id="applicationModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Application</h4>
+      </div>
+      <div class="modal-body">
+         <form id="submitApplication" action="ipfs" method="post" enctype="multipart/form-data">
+									<input type="hidden" value="{{serviceId}}" />                            
+                            <div class="mts-input-name mts-input-fields">
+                                <input type="text" name="name" id="name" placeholder="Name">
+                            </div>
+                               <div class="mts-input-email mts-input-fields">
+                                <input type="text" name="email" id="email" placeholder="Contact Information">
+                            </div>
+          						<div class="mts-input-name mts-input-fields">
+                          
+												<p>Upload CV</p>
+                         
+                                <input type="file" name="cv" style="border: none !important;"/>
+                               
+                            </div>
+
+                            <input type="submit" value="Submit Application" onclick="Controller.submitApplication()" id="submit-application-btn">
+
+                            </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>

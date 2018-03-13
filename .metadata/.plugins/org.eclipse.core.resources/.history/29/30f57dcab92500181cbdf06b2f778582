@@ -1,0 +1,5 @@
+package bg.softuni.servlet.admin;
+
+public class AdminAddress {
+
+}

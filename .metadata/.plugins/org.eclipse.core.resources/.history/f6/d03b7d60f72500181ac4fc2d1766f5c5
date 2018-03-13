@@ -1,0 +1,224 @@
+var Controller = (function () {
+	
+	function getTemplate(templateName, callback){
+		$.ajax({
+		 	 url: 'templates/'+templateName + ".handlebars",
+		 	 method: "GET",
+		 	 contentType: "text/plain",
+		 	 dataType: "text",
+		 	 success: function(templateHtml){
+					callback(templateHtml);		 	 
+		 	 }		
+		});	
+	}
+	
+	function init(){
+		showOffers();
+		
+		
+		$("#test-btn").on("click",function(){
+			Marketplace.test();		
+		});
+		
+		
+		$('#login-modal-btn').on('click',function(e){
+			getTemplate("load-wallet",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal());
+				$("#loadWallet").modal();
+				$('#access-acc-btn').on('click',function(){
+	  				var pass = $('#load-wallet-pass').val();
+	  				Marketplace.recoverWalletFromLocalStorage(pass,function(wallet){
+	  					$("#loadWallet").modal('toggle');
+	  					showSuccessModal("Hello, " + wallet.address);		
+	  				});
+	  			});
+			});
+			e.preventDefault();
+		});
+
+		$('#signup-modal-btn').on('click',function(e){
+			getTemplate("new-wallet",function(html){
+				getTemplate('recover-wallet',function(html2){
+					var bothModals = Handlebars.compile(html + html2);
+					$("#modal-container").html(bothModals());
+					$("#newWallet").modal();
+					$('#create-acc-btn').on('click',function(){
+	  					var pass = $('#new-wallet-pass').val();
+	  					Marketplace.createNewWallet(pass,function(wallet){
+	  						$("#newWallet").modal('toggle');
+	  						showSuccessModal("Keep your seed safe: <strong>" + wallet.mnemonic + "</strong>");		
+	  					});
+	  				});
+	  				$('#recover-acc-btn').on('click',function(){
+	  					var seed = $('#recover-wallet-seed').val();
+	  					var pass = $('#recover-wallet-pass').val();
+	  					Marketplace.recoverWalletFromSeedAndEncrypt(seed, pass,function(wallet){
+	  						$("#recoverWallet").modal('toggle');
+	  						showSuccessModal("Hello, " + wallet.address);		
+	  					});
+	  				});
+				});
+			});
+			e.preventDefault();
+		});
+	
+		$('#deposit-modal-btn').on('click',function(e){
+			getTemplate("deposit",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#modal-container").html(loadWalletModal({address: Marketplace.getWalletAddress()}));
+				$("#depositModal").modal();
+			});
+			e.preventDefault();
+		});
+	
+		$('#withdraw-modal-btn').on('click',function(e){
+			getTemplate("withdraw",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				
+				Marketplace.getWalletBalance().then(function(balance){				
+				$("#modal-container").html(loadWalletModal({balance: balance/1000000000000000000}));
+				$("#withdrawModal").modal();
+				$('#withdraw-btn').on('click',function(){
+					var address = $('#withdraw-address').val();
+					Marketplace.withdrawFromWallet(address,function(status){
+						$("#withdrawModal").modal('toggle');						
+						if(status == true){
+							showSuccessModal("You have successfully withdrawn your balance");
+						}else{
+							showErrorModal("Error occurred");
+						}				
+					});
+				});
+				});
+			});
+			e.preventDefault();
+		});	
+		
+		
+		$("#submitService").submit(function(e) {
+	    		var url = "ipfs"; // the script where you handle the form input.
+
+	    		$.ajax({
+	           type: "POST",
+	           url: url,
+	           data: new FormData(this),
+	           processData: false,
+	           contentType: false, 
+	           success: function(data)
+	           {
+	        	   var title = $("#title").val();
+	        	   var company = $('#company').val();
+	        	   var compensation = $('#compensation').val();
+	        	   
+	               alert(data); 
+	           }
+	        });
+
+	         e.preventDefault(); // avoid to execute the actual submit of the form.
+	   });		
+
+		
+
+		
+	
+		
+
+	}
+
+	function showSuccessModal(message){
+			getTemplate("success",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#successModal").modal();
+			});
+	}	
+	
+	function showErrorModal(message){
+			getTemplate("error",function(html){
+				var loadWalletModal = Handlebars.compile(html);
+				$("#status-modal-container	").html(loadWalletModal({text: message}));
+				$("#errorModal").modal();
+			});
+	}		
+	
+	function showOffers(){
+		$('#products').html('<section id="products"><div class="container"><h1 class="title">Available Offers</h1><hr class="divider" style="width:50%;"><p class="text-center">We have chosen for you:</p><div class="row products-row" id="prod" style="margin-top:40px;"></div></div></section>');
+			getTemplate("grid-item",function(html){
+				var gridItemTemplate = Handlebars.compile(html);
+				var item = gridItemTemplate({
+					img: 'file:///home/radostin-t/Documents/Dapp%20project/project/images/slider/1.png'				
+				});
+				$('#products').find('.products-row').append(item);
+				$('#products').find('.products-row').append(item);
+				$('#products').find('.products-row').append(item);
+			});
+	}
+	
+	function openApplicationModal(id){
+			getTemplate("apply-for-service",function(html){
+				var applicationTemplate = Handlebars.compile(html);
+				$("#modal-container").html(applicationTemplate({serviceId: id}));
+				$("#applicationModal").modal();
+			});	
+	}
+	
+	function submitApplication(e) {
+		console.log("submit");
+		var url = "ipfs"; // the script where you handle the form input.
+
+		$.ajax({
+       type: "POST",
+       url: url,
+       data: new FormData(this),
+       processData: false,
+       contentType: false, 
+       success: function(data)
+       {
+       		console.log(this);
+           alert(data); 
+       }
+    });
+
+    e.preventDefault(); // avoid to execute the actual submit of the form.
+	}
+	
+	function showAccount(){
+		var userDataJson = {};
+		$.ajax({
+			url: 'admin',
+			method: 'GET',
+			contentType: "text/plain",
+			success: function(adminAddress){
+				if(Marketplace.getWalletAddress() == adminAddress){
+					userDataJson.isAdmin = true;
+				}
+				getTemplate("user-data",function(html){
+					var userDataTemplate = Handlebars.compile(html);
+				
+					//Get user data from smart contract
+					Marketplace.getMyServicesAsEmployer(function(resp){
+						
+						//console.log(resp[0][0].toJSON())
+						console.log(resp[0][0].toString())
+						console.log(resp[0][1].toString())
+					});
+					
+					$('#products').html(userDataTemplate(userDataJson));
+				});
+			}
+		});
+		
+		
+	}
+	return {
+		init: init,
+		showSuccessModal: showSuccessModal,
+		showErrorModal: showErrorModal,
+		openApplicationModal: openApplicationModal,
+		submitApplication: submitApplication,
+		showAccount: showAccount,
+		showOffers: showOffers
+	}
+	
+})();
